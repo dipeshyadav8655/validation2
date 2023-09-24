@@ -8,7 +8,7 @@ function App() {
   const [productData, setProductData] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
   const [wrongInput, setWrongInput] = useState([]);
-  const [validated,setValidated] = useState(false)
+  const [validated, setValidated] = useState(false);
 
   const seperatinon = () => {
     const separatedArray = product.split(",");
@@ -42,6 +42,10 @@ function App() {
   };
 
   const validation = () => {
+    console.log(saparatedData, "**seperated Data**");
+    console.log(productData, "Product data");
+    console.log(wrongInput, "**Wrong Inputs**");
+    console.log(duplicates, "**Duplicates**");
     setValidated(true);
     const wrongInputs = [];
     price.map((elem, index) => {
@@ -77,58 +81,108 @@ function App() {
   };
 
   const combine = () => {
-    console.log(saparatedData,"saparatedData");
-    console.log(duplicates,"duplicates");
-  }
+    const combinedData = [];
+
+    const combinedPrices = {};
+
+    duplicates.forEach((duplicate) => {
+      const { value, indices } = duplicate;
+
+      let combinedPrice = 0;
+
+      indices.forEach((index) => {
+        combinedPrice += parseFloat(price[index]);
+      });
+
+      combinedPrices[value] = combinedPrice;
+
+      const combinedString = `${value} ${combinedPrice}`;
+
+      combinedData.push(combinedString);
+    });
+
+    saparatedData.forEach((elem, index) => {
+      if (!duplicates.some((duplicate) => duplicate.indices.includes(index))) {
+        combinedData.push(elem);
+      }
+    });
+
+    setSaparatedData(combinedData);
+    console.log(saparatedData, "new new");
+  };
   const keepFirst = () => {
-    let combinePrice = 0;
-    duplicates.map((elem,index)=>{
-      combinePrice = combinePrice + price[elem.indices[index],[0]];
-    })
-  }
+    const newData = [];
+
+    const seenItems = new Set();
+
+    saparatedData.forEach((elem) => {
+      const separatedProduct = elem.substring(0, elem.indexOf(" "));
+
+      if (!seenItems.has(separatedProduct)) {
+        newData.push(elem);
+        seenItems.add(separatedProduct);
+      }
+    });
+
+    setSaparatedData(newData);
+    console.log(saparatedData);
+  };
 
   return (
-    <>
-      <div className="flex-col justify-center items-center w-screen">
-        <div>
-          <label htmlFor="dataInput" className="mr-2">
-            Enter the data:-
-          </label>
-          <input
-            type="text"
-            id="dataInput"
-            autoFocus
-            className="border-gray-500 border-b-2 focus:outline-none"
-            value={product}
-            onChange={(e) => setproduct(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 ml-5 rounded-sm text-white p-1"
-            onClick={seperatinon}
-          >
-            Check
-          </button>
+    <div className="w-screen h-screen py-2">
+      <div className="w-full flex justify-center items-center">
+        <label htmlFor="dataInput" className="mr-2">
+          Enter the data:-
+        </label>
+        <textarea
+          type="text"
+          id="dataInput"
+          autoFocus
+          className="border-gray-500 border-2 focus:outline-none px-1"
+          value={product}
+          onChange={(e) => setproduct(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 ml-5 rounded-sm text-white p-1"
+          onClick={seperatinon}
+        >
+          Check
+        </button>
+      </div>
+      <div className="px-10  mt-10">
+        <div className="bottom-0 left-0 text-gray-400 text-sm font-bold">
+          Separeted by ',' 'Or' 'or' '='
         </div>
-        <div className="bg-gray-500 w-[500px] h-[200px] my-10">
-          {saparatedData.map((elem, index) => (
-            <div key={index} className="h-5 flex items-center justify-center">
-              <div>{index + 1}</div>
-              <div className="border-[1px] border-red-500 h-full rounded-sm"></div>
-              <div>{elem}</div>
-            </div>
-          ))}
+        <div className="bg-gray-200 w-full h-[300px] rounded-md flex overflow-hidden">
+          <div className="h-full w-20 text-right mx-1">
+            {saparatedData.map((elem, index) => (
+              <div className="text-gray-400 font-semibold">{index + 1}</div>
+            ))}
+          </div>
+          <div className="bg-gray-300 w-[1px] h-full mt-1"></div>
+          <div className="h-full w-fit mx-1">
+            {saparatedData.map((elem, index) => (
+              <>
+                <div key={index} className="font-medium">
+                  {elem}
+                </div>
+              </>
+            ))}
+          </div>
+        </div>
+        <div className="top-0 left-0 text-gray-400 text-sm font-bold">
+          Separeted by ',' 'Or' 'or' '='
         </div>
 
-        <div>
+        <div className="mt-5">
           {duplicates.length > 0 ? (
             <>
-              <div className="text-right w-[500px] cursor-pointer text-red-500">
+              <div className="text-right w-full cursor-pointer text-red-500">
                 <span onClick={combine}>combine |</span>
                 <span onClick={keepFirst}> keep one</span>
               </div>
-              <div className="border-2 border-red-300 rounded-md w-[500px] px-6 py-2 text-center">
-                <p>Duplicate Elements:</p>
+              <div className="border-2 border-red-300 rounded-md w-full h-fit px-6 py-2 text-center">
                 <ul>
                   {duplicates.map((duplicate, index) => (
                     <li key={index}>
@@ -140,7 +194,7 @@ function App() {
               </div>
             </>
           ) : wrongInput.length > 0 ? (
-            <div className="border-2 border-red-300 rounded-md w-[500px] px-6 py-2 text-center">
+            <div className="border-2 border-red-300 rounded-md w-full h-fit px-6 py-2 text-center">
               <p>wrong input:</p>
               <ul>
                 {wrongInput.map((price, index) => (
@@ -149,22 +203,24 @@ function App() {
               </ul>
             </div>
           ) : validated ? (
-            <div className="border-2 border-green-300 rounded-md w-[500px] px-6 py-2 text-center">
+            <div className="border-2 border-green-300 rounded-md w-full h-fit px-6 py-2 text-center">
               <p>SUCESS</p>
             </div>
-          ): ""}
+          ) : (
+            ""
+          )}
         </div>
         <div>
           <button
             type="submit"
-            className="w-[500px] text-center bg-blue-800 rounded-[5px] mt-5"
+            className="w-full h-16 text-center bg-blue-800 rounded-[5px] mt-5"
             onClick={validation}
           >
             Next
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 export default App;
